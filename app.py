@@ -1,202 +1,110 @@
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
+import io
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
-# --- إعدادات الصفحة ---
-st.set_page_config(page_title="Reportage Agent - SILA", layout="wide")
-
-# --- دالة حساب التواريخ والأقساط الذكية ---
-def generate_payment_plan(selling_price, plan_choice, dp_pct, dp_months, cash_months, start_date, handover_date):
+# --- دالة حساب خطة الدفع ---
+def calculate_payment_plan(selling_price, plan_name, dp_split_months, start_date, handover_date):
     plan = []
+    res_fee = 20000
+    plan.append({"Milestone": "Reservation Fee", "Date": "Now", "Percent": "-", "Amount": res_fee})
     
-    # رسوم الحجز ثابتة
-    plan.append({"Installment": 1, "Milestone": "Reservation Fee", "Date": "Now", "Percent": "-", "Amount": 20000})
+    # تعريف إعدادات الخطط
+    plans_config = {
+        "Plan 11": {"dp": 30, "type": "ho"},
+        "Plan 12": {"dp": 100, "type": "cash"},
+        "Plan 13": {"dp": 100, "type": "cash"},
+        "Plan 14": {"dp": 100, "type": "cash"},
+        "Plan 15 (20/80)": {"dp": 20, "type": "ho"},
+        "Plan 15 (20 in 20m)": {"dp": 20, "type": "monthly_dp"}
+    }
     
-    # حساب الدفعة المقدمة الصافية (خصم الحجز)
-    total_dp_amount = (selling_price * (dp_pct / 100)) - 20000
+    cfg = plans_config[plan_name]
+    total_dp_val = (selling_price * (cfg['dp'] / 100)) - res_fee
     
-    # ------------------ خطة كاش (Plan 12, 13, 14) ------------------
-    if "Cash" in plan_choice:
-        remaining_for_cash = selling_price - 20000
-        cash_per_month = remaining_for_cash / cash_months
-        current_date = start_date
-        
-        for i in range(cash_months):
-            plan.append({
-                "Installment": i + 2,
-                "Milestone": f"Cash Payment {i+1}/{cash_months}",
-                "Date": current_date.strftime("%B-%y"),
-                "Percent": f"{round(100/cash_months, 2)}%",
-                "Amount": cash_per_month
-            })
-            current_date += relativedelta(months=1)
+    # توزيع الـ DP
+    if dp_split_months > 1:
+        monthly_dp = total_dp_val / dp_split_months
+        for i in range(dp_split_months):
+            d = start_date + relativedelta(months=i)
+            plan.append({"Milestone": f"DP Installment {i+1}", "Date": d.strftime("%b-%y"), "Percent": f"{(cfg['dp']/dp_split_months):.1f}%", "Amount": monthly_dp})
+    else:
+        plan.append({"Milestone": "1st Installment (DP)", "Date": start_date.strftime("%b-%y"), "Percent": f"{cfg['dp']}%", "Amount": total_dp_val})
+
+    # الأقساط الشهرية أو الكاش
+    if cfg['type'] == "cash":
+        remaining = selling_price - (total_dp_val + res_fee)
+        if remaining > 0:
+            cash_period = 3 # افتراضي 3 أشهر للكاش
+            for i in range(1, cash_period + 1):
+                d = start_date + relativedelta(months=i + dp_split_months - 1)
+                plan.append({"Milestone": "Cash Payment", "Date": d.strftime("%b-%y"), "Percent": "Balance", "Amount": remaining/cash_period})
+    
+    elif cfg['type'] == "ho" or cfg['type'] == "monthly_dp":
+        # إضافة 1% شهرياً إذا كانت الخطة تسمح
+        if plan_name not in ["Plan 11", "Plan 15 (20/80)"]:
+            monthly_amt = selling_price * 0.01
+            curr_d = start_date + relativedelta(months=dp_split_months)
+            while curr_d < handover_date:
+                plan.append({"Milestone": "Monthly Installment", "Date": curr_d.strftime("%b-%y"), "Percent": "1%", "Amount": monthly_amt})
+                curr_d += relativedelta(months=1)
+
+        # دفعة الاستلام
+        total_paid_so_far = sum(item['Amount'] for item in plan)
+        balance = selling_price - total_paid_so_far
+        if balance > 0:
+            plan.append({"Milestone": "On Handover", "Date": handover_date.strftime("%b-%y"), "Percent": "Balance", "Amount": balance})
             
-    # ------------------ الخطط العادية (Plan 11, 15) ------------------
-    elif plan_choice in ["Plan 11", "Plan 15 (20/80)", "Plan 15 (20% split)"]:
-        # تقسيط الدفعة المقدمة إن وجد
-        if dp_months > 1 and total_dp_amount > 0:
-            dp_per_month = total_dp_amount / dp_months
-            current_date = start_date
-            for i in range(dp_months):
-                plan.append({
-                    "Installment": i + 2,
-                    "Milestone": f"DP Installment {i+1}/{dp_months}",
-                    "Date": current_date.strftime("%B-%y"),
-                    "Percent": f"{round(dp_pct/dp_months, 2)}%",
-                    "Amount": dp_per_month
-                })
-                current_date += relativedelta(months=1)
-        else:
-            plan.append({
-                "Installment": 2,
-                "Milestone": "1st Installment (DP)",
-                "Date": start_date.strftime("%B-%y"),
-                "Percent": f"{dp_pct}%",
-                "Amount": total_dp_amount
-            })
-            
-        # المبلغ المتبقي عند الاستلام
-        total_paid = sum(item['Amount'] for item in plan)
-        handover_amt = selling_price - total_paid
-        
-        plan.append({
-            "Installment": len(plan) + 1,
-            "Milestone": "On Handover",
-            "Date": handover_date.strftime("%B-%y"),
-            "Percent": "Balance",
-            "Amount": handover_amt
-        })
-        
     return plan
 
-# --- دالة لتوليد ملف الـ PDF بنفس التنسيق المطلوب ---
-class PDF(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 15)
-        self.cell(0, 10, 'SALES OFFER - SILA MASDAR', 0, 1, 'C')
-        self.ln(10)
-
-def create_pdf(unit_no, unit_info, selling_price, net_price, parking, disc_val, gov_fees, installments):
-    pdf = PDF()
+# --- دالة إنشاء الـ PDF (المصححة) ---
+def create_pdf_report(unit_info, financials, schedule):
+    pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=11)
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(0, 10, "SALES OFFER - SILA MASDAR", ln=True, align='C')
+    pdf.ln(10)
     
-    # تفاصيل الوحدة
-    pdf.cell(0, 10, f"Unit: {unit_no}", 0, 1)
-    pdf.cell(0, 10, f"Type: {unit_info['UNIT TYPE']} - {unit_info['Bedrooms']}", 0, 1)
-    pdf.cell(0, 10, f"Total Area: {unit_info['Total Area (Sq.ft)']} SQFT", 0, 1)
-    pdf.cell(0, 10, f"View: {unit_info['View']}", 0, 1)
+    pdf.set_font("Arial", size=11)
+    pdf.cell(0, 10, f"Unit Number: {unit_info['Plot + Unit No.']}", ln=True)
+    pdf.cell(0, 10, f"Unit Type: {unit_info['UNIT TYPE']} - {unit_info['Bedrooms']}", ln=True)
+    pdf.cell(0, 10, f"Total Area: {unit_info['Total Area (Sq.ft)']} SQFT", ln=True)
     pdf.ln(5)
     
-    # تفاصيل الأسعار
-    pdf.cell(0, 10, f"Unit Price: {float(unit_info['Price ']):,.2f} AED", 0, 1)
-    pdf.cell(0, 10, f"Discount: -{disc_val:,.2f} AED", 0, 1)
-    pdf.cell(0, 10, f"Price After Discount: {net_price:,.2f} AED", 0, 1)
-    pdf.cell(0, 10, f"Parking: {parking:,.2f} AED", 0, 1)
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, f"Total Selling Price: {selling_price:,.2f} AED", 0, 1)
-    pdf.cell(0, 10, f"Government Fees (2% + 625): {gov_fees:,.2f} AED", 0, 1)
+    # البيانات المالية
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(100, 10, "Description", 1, 0, 'C', True)
+    pdf.cell(90, 10, "Value (AED)", 1, 1, 'C', True)
+    
+    pdf.cell(100, 10, "Original Price", 1)
+    pdf.cell(90, 10, f"{financials['u_price']:,.0f}", 1, 1, 'R')
+    pdf.cell(100, 10, "Selling Price (Incl. Parking)", 1)
+    pdf.cell(90, 10, f"{financials['selling_price']:,.0f}", 1, 1, 'R')
     pdf.ln(10)
     
     # جدول الأقساط
     pdf.set_font("Arial", 'B', 10)
-    pdf.cell(10, 10, "No", 1)
-    pdf.cell(50, 10, "Milestone", 1)
-    pdf.cell(30, 10, "Date", 1)
-    pdf.cell(30, 10, "Percent", 1)
-    pdf.cell(40, 10, "Amount (AED)", 1)
-    pdf.ln()
+    pdf.cell(60, 10, "Milestone", 1, 0, 'C', True)
+    pdf.cell(40, 10, "Date", 1, 0, 'C', True)
+    pdf.cell(30, 10, "Percent", 1, 0, 'C', True)
+    pdf.cell(60, 10, "Amount (AED)", 1, 1, 'C', True)
     
-    pdf.set_font("Arial", size=10)
-    for row in installments:
-        pdf.cell(10, 10, str(row['Installment']), 1)
-        pdf.cell(50, 10, str(row['Milestone']), 1)
-        pdf.cell(30, 10, str(row['Date']), 1)
-        pdf.cell(30, 10, str(row['Percent']), 1)
-        pdf.cell(40, 10, f"{row['Amount']:,.2f}", 1)
-        pdf.ln()
-        
-    return pdf.output(dest='S').encode('latin-1')
-
-# --- واجهة التطبيق الرئيسية ---
-st.title("🤖 Reportage Smart AI Agent")
-
-uploaded_file = st.file_uploader("Upload SILA Availability (CSV/XLSX)", type=["csv", "xlsx"])
-
-if uploaded_file:
-    df = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('csv') else pd.read_excel(uploaded_file)
+    pdf.set_font("Arial", size=9)
+    for row in schedule:
+        pdf.cell(60, 8, str(row['Milestone']), 1)
+        pdf.cell(40, 8, str(row['Date']), 1)
+        pdf.cell(30, 8, str(row['Percent']), 1)
+        pdf.cell(60, 8, f"{row['Amount']:,.0f}", 1, 1, 'R')
     
-    st.sidebar.header("Parameters & Plans")
-    unit_no = st.sidebar.selectbox("Select Unit Number:", df['Plot + Unit No.'].unique())
-    unit_info = df[df['Plot + Unit No.'] == unit_no].iloc[0]
-    
-    # اختيار الخطة والقواعد
-    plan_choice = st.sidebar.selectbox("Select Payment Plan:", [
-        "Plan 11 (30% DP - 70% HO)",
-        "Plan 12 (Cash 40% Disc)",
-        "Plan 13 (Cash 25% Disc)",
-        "Plan 14 (Cash 30% Disc)",
-        "Plan 15 (20/80)",
-        "Plan 15 (20% split)"
-    ])
-    
-    # تطبيق الخصومات والـ DP أوتوماتيكياً حسب اختيارك للـ Plan
-    discount = 0
-    dp_input = 0
-    cash_months = 3
-    dp_months = 1
-    
-    if plan_choice == "Plan 11 (30% DP - 70% HO)":
-        discount = 5
-        dp_input = 30
-    elif plan_choice == "Plan 12 (Cash 40% Disc)":
-        discount = 40
-        cash_months = st.sidebar.number_input("How many months for Cash?", 1, 12, 3)
-    elif plan_choice == "Plan 13 (Cash 25% Disc)":
-        discount = 25
-        cash_months = st.sidebar.number_input("How many months for Cash?", 1, 12, 3)
-    elif plan_choice == "Plan 14 (Cash 30% Disc)":
-        discount = 30
-        cash_months = st.sidebar.number_input("How many months for Cash?", 1, 12, 3)
-    elif plan_choice == "Plan 15 (20/80)":
-        discount = 0
-        dp_input = 20
-    elif plan_choice == "Plan 15 (20% split)":
-        discount = 0
-        dp_input = 20
-        dp_months = st.sidebar.number_input("Divide DP over how many months?", 1, 20, 20)
+    # حفظ في ذاكرة مؤقتة بدلاً من ملف
+    return pdf.output(dest='S')
 
-    # --- الحسابات المالية الدقيقة ---
-    u_price = float(unit_info['Price '])
-    disc_val = u_price * (discount / 100)
-    net_price = u_price - disc_val
-    parking = 0 if "Townhouse" in str(unit_info['UNIT TYPE']) else 40000
-    selling_price = net_price + parking
-    gov_fees = (selling_price * 0.02) + 625
+# --- واجهة Streamlit ---
+st.title("🏗️ Reportage Sales AI Agent")
 
-    # --- عرض بطاقات النتائج ---
-    st.write(f"### Results for Unit: {unit_no} ({unit_info['UNIT TYPE']})")
-    res_col1, res_col2, res_col3, res_col4 = st.columns(4)
-    res_col1.metric("Original Price", f"{u_price:,.0f} AED")
-    res_col2.metric("Discount Applied", f"-{disc_val:,.0f} AED ({discount}%)")
-    res_col3.metric("Final Selling Price", f"{selling_price:,.0f} AED")
-    res_col4.metric("Gov Fees", f"{gov_fees:,.0f} AED")
+file = st.file_uploader("Upload SILA Data", type=["csv", "xlsx"])
 
-    # توليد جدول الأقساط
-    handover_dt = date(2029, 9, 1)
-    installments = generate_payment_plan(selling_price, plan_choice, dp_input, dp_months, cash_months, date.today(), handover_dt)
-    
-    st.subheader("Payment Plan Schedule")
-    st.table(pd.DataFrame(installments))
-
-    # --- زر تفعيل توليد الـ PDF حقيقياً ---
-    pdf_data = create_pdf(unit_no, unit_info, selling_price, net_price, parking, disc_val, gov_fees, installments)
-    
-    st.download_button(
-        label="Generate and Download PDF",
-        data=pdf_data,
-        file_name=f"Offer_Unit_{unit_no}.pdf",
-        mime="application/pdf"
-    )
+if file:
+    df = pd.read_csv
