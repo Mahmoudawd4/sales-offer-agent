@@ -172,7 +172,9 @@ if df_inventory is not None and df_photos is not None:
 
     # الحسابات المالية
     # نستخدم Original Price (AED) كما هو مكتوب في ملفك
-    u_price = float(unit_data.get('Original Price (AED)', 0)) 
+    # السطر المحدث لتجنب مشكلة الفواصل
+    raw_price = str(unit_data.get('Original Price (AED)', '0'))
+    u_price = float(raw_price.replace(',', ''))
     total_disc_pct = ALL_PLANS[selected_plan]['disc'] + extra_disc
     disc_val = u_price * (total_disc_pct / 100)
     selling_price = (u_price - disc_val) + 40000 # إضافة الباركينج 40 ألف
