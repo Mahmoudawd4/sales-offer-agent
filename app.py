@@ -79,4 +79,4 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     
     # اللوجو
     try:
-        pdf.image(LOGO_URL, x=10, y=8
+        pdf.image(LOGO_URL, x=10, y=8)
