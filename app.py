@@ -26,7 +26,7 @@ ALL_PLANS = {
 def load_google_sheet(url):
     try:
         df = pd.read_csv(url)
-        # مسح المسافات الزائدة من النصوص لضمان مطابقة الصور
+        # تنظيف البيانات من المسافات الزائدة لضمان المطابقة
         df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
         return df
     except Exception as e:
@@ -77,10 +77,11 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     pdf = FPDF()
     pdf.add_page()
     
-    # اللوجو
+    # اللوجو (مع تصحيح القوس)
     try:
         pdf.image(LOGO_URL, x=10, y=8, w=35)
-    except: pass
+    except:
+        pass
 
     # العنوان
     pdf.set_font("Arial", 'B', 18)
@@ -88,16 +89,18 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     pdf.cell(0, 15, "SALES OFFER - SILA MASDAR", ln=True, align='C')
     pdf.ln(5)
 
-    # إضافة المخطط (Layout)
+    # إضافة المخطط (Layout) باستخدام طلب مباشر لضمان التحميل
     if layout_url and str(layout_url) != 'nan':
         try:
-            response = requests.get(layout_url, timeout=10)
-            img_data = BytesIO(response.content)
-            pdf.image(img_data, x=135, y=35, w=60)
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            response = requests.get(layout_url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                img_data = BytesIO(response.content)
+                pdf.image(img_data, x=135, y=35, w=60)
         except:
             pdf.set_xy(135, 40)
             pdf.set_font("Arial", size=8)
-            pdf.cell(60, 10, "Layout not available", border=0, align='C')
+            pdf.cell(60, 10, "Layout image error", border=0, align='C')
 
     # بيانات الوحدة
     pdf.set_xy(10, 35)
@@ -107,9 +110,12 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     pdf.set_font("Arial", size=10)
     pdf.set_text_color(0)
     
+    # استخدام .get لضمان جلب Unit Type حتى لو اختلف مسمى العمود
+    u_type = unit_data.get('UNIT TYPE', unit_data.get('Unit Type', 'N/A'))
+    
     specs = [
         f"Unit No: {unit_data.get('Plot + Unit No.', 'N/A')}",
-        f"Unit Type: {unit_data.get('UNIT TYPE', 'N/A')}",
+        f"Unit Type: {u_type}",
         f"Bedrooms: {unit_data.get('Bedrooms', 'N/A')}",
         f"Sub-type: {unit_data.get('Sub-type', 'N/A')}",
         f"Total Area: {unit_data.get('Total Area (Sq.ft)', '0')} SQFT",
@@ -152,7 +158,7 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
         
     return pdf.output(dest='S')
 
-# --- 4. واجهة التطبيق ---
+# --- 4. واجهة التطبيق (Streamlit) ---
 st.set_page_config(page_title="Reportage Smart Agent", layout="wide")
 st.title("🏗️ Reportage AI Sales Agent")
 
@@ -187,7 +193,7 @@ if df_inventory is not None and df_photos is not None:
     
     schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), date(2029, 9, 1))
     
-    # البحث عن الصورة
+    # البحث عن الصورة (بناءً على المشروع، عدد الغرف، والنوع الفرعي)
     match = df_photos[
         (df_photos['Project'] == "SILA") & 
         (df_photos['Bedrooms'].astype(str) == str(unit_data['Bedrooms']).strip()) & 
@@ -201,7 +207,7 @@ if df_inventory is not None and df_photos is not None:
     with col1:
         st.subheader("📋 Unit Details & Financials")
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Type", unit_data['UNIT TYPE'])
+        m1.metric("Type", unit_data.get('UNIT TYPE', 'N/A'))
         m2.metric("Bedrooms", unit_data['Bedrooms'])
         m3.metric("Selling Price", f"{selling_price:,.0f} AED")
         m4.metric("Total Discount", f"{total_disc_pct}%")
@@ -223,4 +229,4 @@ if df_inventory is not None and df_photos is not None:
             use_container_width=True
         )
 else:
-    st.error("Check your Google Sheets URLs.")
+    st.error("Please check your Google Sheets connectivity.")
