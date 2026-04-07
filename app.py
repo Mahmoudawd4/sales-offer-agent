@@ -25,7 +25,10 @@ ALL_PLANS = {
 @st.cache_data
 def load_google_sheet(url):
     try:
-        return pd.read_csv(url)
+        df = pd.read_csv(url)
+        # هذا السطر الجديد يمسح المسافات الزائدة من الأسماء لضمان المطابقة
+        df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+        return df
     except Exception as e:
         st.error(f"خطأ في تحميل البيانات: {e}")
         return None
@@ -76,7 +79,15 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     
     # Header & Logo
     try:
-        pdf.image(LOGO_URL, x=10, y=8, w=35)
+        # إضافة صورة المخطط (Layout) في الجانب الأيمن
+    if layout_url and str(layout_url) != 'nan':
+        try:
+            response = requests.get(layout_url, timeout=10)
+            img_data = BytesIO(response.content)
+            # x=135 (يمين), y=40 (تحت اللوجو), w=60 (العرض)
+            pdf.image(img_data, x=135, y=40, w=60)
+        except Exception as e:
+            st.warning(f"تعذر إضافة الصورة للـ PDF: {e}")
     except: pass
     pdf.set_font("Arial", 'B', 18)
     pdf.set_text_color(44, 62, 80)
@@ -193,11 +204,20 @@ if df_inventory is not None and df_photos is not None:
     df_sched = pd.DataFrame(schedule)
 
     # البحث عن الصورة
-    match = df_photos[
-        (df_photos['Bedrooms'] == unit_data['Bedrooms']) & 
-        (df_photos['Sub-type'] == unit_data['Sub-type'])
-    ]
-    layout_url = match.iloc[0]['Layout_URL'] if not match.empty else None
+     # منطق البحث عن الصورة (تأكد من مطابقة أسماء الأعمدة في ملفك)
+   match = df_photos[
+      (df_photos['Project'] == "SILA") & 
+      (df_photos['Bedrooms'] == str(unit_data['Bedrooms']).strip()) & 
+      (df_photos['Sub-type'] == str(unit_data['Sub-type']).strip())
+      ]
+
+   if not match.empty:
+      layout_url = match.iloc[0]['Layout_URL']
+      st.image(layout_url, caption=f"Layout for {unit_data['Sub-type']}", width=500)
+   else:
+      # هذا السطر سيظهر لك في الموقع ليخبرك أين الخطأ بالضبط
+      st.error(f"⚠️ لم يتم العثور على صورة في Photo_Bank للمشروع: SILA، الغرف: {unit_data['Bedrooms']}، النوع: {unit_data['Sub-type']}")
+   layout_url = match.iloc[0]['Layout_URL'] if not match.empty else None
 
     # --- عرض البيانات في الموقع ---
     st.divider()
