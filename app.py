@@ -79,4 +79,148 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     
     # اللوجو
     try:
-        pdf.image(LOGO_URL, x=10, y=8)
+        pdf.image(LOGO_URL, x=10, y=8, w=35)
+    except: pass
+
+    # العنوان
+    pdf.set_font("Arial", 'B', 18)
+    pdf.set_text_color(44, 62, 80)
+    pdf.cell(0, 15, "SALES OFFER - SILA MASDAR", ln=True, align='C')
+    pdf.ln(5)
+
+    # إضافة المخطط (Layout)
+    if layout_url and str(layout_url) != 'nan':
+        try:
+            response = requests.get(layout_url, timeout=10)
+            img_data = BytesIO(response.content)
+            pdf.image(img_data, x=135, y=35, w=60)
+        except:
+            pdf.set_xy(135, 40)
+            pdf.set_font("Arial", size=8)
+            pdf.cell(60, 10, "Layout not available", border=0, align='C')
+
+    # بيانات الوحدة
+    pdf.set_xy(10, 35)
+    pdf.set_fill_color(240, 240, 240)
+    pdf.set_font("Arial", 'B', 11)
+    pdf.cell(110, 8, " UNIT SPECIFICATIONS", 0, 1, 'L', True)
+    pdf.set_font("Arial", size=10)
+    pdf.set_text_color(0)
+    
+    specs = [
+        f"Unit No: {unit_data.get('Plot + Unit No.', 'N/A')}",
+        f"Unit Type: {unit_data.get('UNIT TYPE', 'N/A')}",
+        f"Bedrooms: {unit_data.get('Bedrooms', 'N/A')}",
+        f"Sub-type: {unit_data.get('Sub-type', 'N/A')}",
+        f"Total Area: {unit_data.get('Total Area (Sq.ft)', '0')} SQFT",
+        f"View: {unit_data.get('View', 'N/A')}"
+    ]
+    for spec in specs:
+        pdf.cell(110, 6, f" {spec}", ln=True)
+    pdf.ln(5)
+
+    # الخلاصة المالية
+    pdf.set_font("Arial", 'B', 11)
+    pdf.set_fill_color(240, 240, 240)
+    pdf.cell(110, 8, f" FINANCIAL SUMMARY - {plan_name}", 0, 1, 'L', True)
+    pdf.set_font("Arial", size=10)
+    pdf.cell(60, 6, "Original Price:", 0)
+    pdf.cell(50, 6, f"{financials['u_price']:,.2f} AED", 0, 1, 'R')
+    pdf.cell(60, 6, f"Discount ({financials['disc_pct']}%):", 0)
+    pdf.cell(50, 6, f"- {financials['disc_val']:,.2f} AED", 0, 1, 'R')
+    pdf.set_font("Arial", 'B', 10)
+    pdf.cell(60, 8, "Selling Price (Incl. Parking):", 0)
+    pdf.cell(50, 8, f"{financials['selling_price']:,.2f} AED", 0, 1, 'R')
+    pdf.ln(8)
+
+    # جدول الأقساط
+    pdf.set_font("Arial", 'B', 10)
+    pdf.set_fill_color(44, 62, 80)
+    pdf.set_text_color(255, 255, 255)
+    pdf.cell(60, 10, " Milestone", 1, 0, 'L', True)
+    pdf.cell(40, 10, " Date", 1, 0, 'C', True)
+    pdf.cell(30, 10, " %", 1, 0, 'C', True)
+    pdf.cell(60, 10, " Amount (AED)", 1, 1, 'R', True)
+
+    pdf.set_text_color(0)
+    pdf.set_font("Arial", size=9)
+    for row in schedule:
+        pdf.cell(60, 8, f" {row['Milestone']}", 1)
+        pdf.cell(40, 8, f" {row['Date']}", 1, 0, 'C')
+        pdf.cell(30, 8, f" {row['Percent']}", 1, 0, 'C')
+        pdf.cell(60, 8, f"{row['Amount']:,.2f} ", 1, 1, 'R')
+        
+    return pdf.output(dest='S')
+
+# --- 4. واجهة التطبيق ---
+st.set_page_config(page_title="Reportage Smart Agent", layout="wide")
+st.title("🏗️ Reportage AI Sales Agent")
+
+df_inventory = load_google_sheet(SILA_SHEET_URL)
+df_photos = load_google_sheet(PHOTO_BANK_URL)
+
+if df_inventory is not None and df_photos is not None:
+    with st.sidebar:
+        st.header("⚙️ Financial Settings")
+        selected_plan = st.selectbox("Base Payment Plan:", list(ALL_PLANS.keys()))
+        extra_disc = st.number_input("Extra Discount %", 0.0, 15.0, 0.0, step=0.5)
+        st.divider()
+        st.subheader("Customizations")
+        m_pct = st.number_input("Monthly Installment %", 0.0, 5.0, 1.0, step=0.1)
+        dp_m = st.number_input("DP Split (Months):", 1, 24, 1)
+        r_freq = st.selectbox("Recovery Every (Months):", [0, 6, 12])
+        r_pct = st.number_input("Recovery Amount %", 0.0, 20.0, 0.0)
+
+    unit_id = st.selectbox("Select Unit Number:", df_inventory['Plot + Unit No.'].unique())
+    unit_data = df_inventory[df_inventory['Plot + Unit No.'] == unit_id].iloc[0]
+
+    # معالجة السعر وتنظيفه من الفواصل
+    raw_price = str(unit_data.get('Original Price (AED)', '0'))
+    u_price = float(raw_price.replace(',', ''))
+    
+    total_disc_pct = ALL_PLANS[selected_plan]['disc'] + extra_disc
+    disc_val = u_price * (total_disc_pct / 100)
+    selling_price = (u_price - disc_val) + 40000 
+    
+    financials = {'u_price': u_price, 'disc_pct': total_disc_pct, 'disc_val': disc_val, 'selling_price': selling_price}
+    settings = {'dp_months': dp_m, 'monthly_pct': m_pct, 'recovery_freq': r_freq, 'recovery_pct': r_pct}
+    
+    schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), date(2029, 9, 1))
+    
+    # البحث عن الصورة
+    match = df_photos[
+        (df_photos['Project'] == "SILA") & 
+        (df_photos['Bedrooms'].astype(str) == str(unit_data['Bedrooms']).strip()) & 
+        (df_photos['Sub-type'].astype(str) == str(unit_data['Sub-type']).strip())
+    ]
+    layout_url = match.iloc[0]['Layout_URL'] if not match.empty else None
+
+    st.divider()
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("📋 Unit Details & Financials")
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Type", unit_data['UNIT TYPE'])
+        m2.metric("Bedrooms", unit_data['Bedrooms'])
+        m3.metric("Selling Price", f"{selling_price:,.0f} AED")
+        m4.metric("Total Discount", f"{total_disc_pct}%")
+        st.dataframe(pd.DataFrame(schedule).style.format({"Amount": "{:,.2f}"}), use_container_width=True)
+        
+    with col2:
+        if layout_url:
+            st.image(layout_url, caption=f"Layout: {unit_data['Sub-type']}", use_column_width=True)
+        else:
+            st.warning(f"No Layout Image found for {unit_data['Bedrooms']} - {unit_data['Sub-type']}")
+            
+        st.write("### 📥 Export Offer")
+        pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan)
+        st.download_button(
+            label="Download Official PDF",
+            data=bytes(pdf_bytes),
+            file_name=f"Offer_SILA_{unit_id}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+else:
+    st.error("Check your Google Sheets URLs.")
