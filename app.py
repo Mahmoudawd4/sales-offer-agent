@@ -6,26 +6,31 @@ from io import BytesIO
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-# --- 1. قاعدة بيانات الروابط ---
+# --- 1. قاعدة بيانات المشاريع مع إعدادات الرسوم الحكومية ---
 PROJECTS_DATABASE = {
-    "SILA MASDAR": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=0&single=true&output=csv",
-    "KHALIFA CITY": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1491192679&single=true&output=csv"
+    "SILA MASDAR": {
+        "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=0&single=true&output=csv",
+        "gov_pct": 2.0,      # نسبة الرسوم (مثلاً 2%)
+        "admin_fees": 0      # رسوم إدارية إضافية
+    },
+    "KHALIFA CITY": {
+        "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1491192679&single=true&output=csv",
+        "gov_pct": 2.0,      # 2%
+        "admin_fees": 625    # مصاريف إدارية ثابتة لخليفة سيتي
+    }
 }
 
 PHOTO_BANK_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1714647206&single=true&output=csv"
 LOGO_URL = "https://i.ibb.co/3sbsK2S/Reportage-Logo.png" 
 
-# --- 2. قاموس الخطط المحدث بالإضافات الجديدة ---
+# --- 2. قاموس الخطط المحدث ---
 ALL_PLANS = {
-    # الخطط الجديدة المطلوبة
     "30% DP / 5% Disc / 70% Handover": {"dp_pct": 30, "disc": 5, "default_monthly": 0.0},
     "5% DP / 5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 5, "default_monthly": 1.0},
     "5% DP / 0% Disc / 1% Monthly": {"dp_pct": 5, "disc": 0, "default_monthly": 1.0},
     "5% DP / 2.5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 2.5, "default_monthly": 1.0},
     "10% DP / 5% Disc / 1% Monthly": {"dp_pct": 10, "disc": 5, "default_monthly": 1.0},
     "20% DP / 15% Disc / 1% Monthly": {"dp_pct": 20, "disc": 15, "default_monthly": 1.0},
-    
-    # الخطط السابقة
     "10% DP / 10% Disc / 1% Monthly": {"dp_pct": 10, "disc": 10, "default_monthly": 1.0},
     "20% DP / 10% Disc / 1% Monthly": {"dp_pct": 20, "disc": 10, "default_monthly": 1.0},
     "30% DP / 15% Disc / 1% Monthly": {"dp_pct": 30, "disc": 15, "default_monthly": 1.0},
@@ -132,8 +137,16 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     pdf.set_font("Arial", size=10)
     pdf.cell(60, 6, "Original Price:", 0); pdf.cell(50, 6, f"{financials['u_price']:,.2f} AED", 0, 1, 'R')
     pdf.cell(60, 6, f"Discount ({financials['disc_pct']}%):", 0); pdf.cell(50, 6, f"- {financials['disc_val']:,.2f} AED", 0, 1, 'R')
+    pdf.cell(60, 6, "Selling Price:", 0); pdf.cell(50, 6, f"{financials['selling_price']:,.2f} AED", 0, 1, 'R')
+    
+    # إضافة الرسوم الحكومية في الـ PDF
+    pdf.set_text_color(200, 0, 0)
+    pdf.cell(60, 6, "Gov. Fees (Registration):", 0); pdf.cell(50, 6, f"{financials['gov_fees']:,.2f} AED", 0, 1, 'R')
+    pdf.set_text_color(0)
+    
     pdf.set_font("Arial", 'B', 10)
-    pdf.cell(60, 8, "Total Selling Price:", 0); pdf.cell(50, 8, f"{financials['selling_price']:,.2f} AED", 0, 1, 'R')
+    total_all = financials['selling_price'] + financials['gov_fees']
+    pdf.cell(60, 8, "Total Amount Payable:", 0); pdf.cell(50, 8, f"{total_all:,.2f} AED", 0, 1, 'R')
     
     pdf.ln(8)
     pdf.set_font("Arial", 'B', 10); pdf.set_fill_color(44, 62, 80); pdf.set_text_color(255, 255, 255)
@@ -163,7 +176,10 @@ st.title("🏗️ Reportage Sales AI")
 with st.sidebar:
     st.header("🏢 Settings")
     selected_project = st.selectbox("Project:", list(PROJECTS_DATABASE.keys()))
-    df_inventory = load_google_sheet(PROJECTS_DATABASE[selected_project])
+    
+    # الحصول على إعدادات المشروع المختار
+    proj_info = PROJECTS_DATABASE[selected_project]
+    df_inventory = load_google_sheet(proj_info["url"])
     df_photos = load_google_sheet(PHOTO_BANK_URL)
     
     selected_plan = st.selectbox("Plan:", list(ALL_PLANS.keys()))
@@ -182,14 +198,25 @@ if df_inventory is not None:
 
     u_price = float(str(unit_data.get('Original Price (AED)', '0')).replace(',', ''))
     total_disc_pct = ALL_PLANS[selected_plan]['disc'] + extra_disc
+    
+    # الحسابات المالية
     selling_price = (u_price * (1 - total_disc_pct/100)) + float(str(unit_data.get('parking', '0')).replace(',', ''))
+    
+    # --- حسبة الـ Gov Fees الجديدة ---
+    gov_fees = (selling_price * (proj_info["gov_pct"] / 100)) + proj_info["admin_fees"]
     
     try: handover_finish_date = pd.to_datetime(unit_data.get('Handover Date', '2029-09-01')).date()
     except: handover_finish_date = date(2029, 9, 1)
 
-    financials = {'u_price': u_price, 'disc_pct': total_disc_pct, 'disc_val': u_price * (total_disc_pct/100), 'parking': 0, 'selling_price': selling_price}
-    settings = {'dp_months': dp_m, 'monthly_pct': m_pct, 'recovery_freq': r_freq, 'recovery_pct': r_pct}
+    financials = {
+        'u_price': u_price, 
+        'disc_pct': total_disc_pct, 
+        'disc_val': u_price * (total_disc_pct/100), 
+        'selling_price': selling_price,
+        'gov_fees': gov_fees
+    }
     
+    settings = {'dp_months': dp_m, 'monthly_pct': m_pct, 'recovery_freq': r_freq, 'recovery_pct': r_pct}
     schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), handover_finish_date)
 
     try:
@@ -201,13 +228,19 @@ if df_inventory is not None:
     except: layout_url = None
 
     st.divider()
+    
+    # عرض ملخص مالي سريع في الأعلى
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Selling Price", f"{selling_price:,.2f} AED")
+    m2.metric("Gov. Fees", f"{gov_fees:,.2f} AED", delta=f"{proj_info['gov_pct']}% + {proj_info['admin_fees']}")
+    m3.metric("Total Payable", f"{selling_price + gov_fees:,.2f} AED")
+
     c1, c2 = st.columns([2, 1])
     with c1:
-        st.subheader(f"📊 Unit {unit_id} - {selected_plan}")
+        st.subheader(f"📊 Payment Schedule - {unit_id}")
         st.dataframe(pd.DataFrame(schedule).style.format({"Amount": "{:,.2f}"}), use_container_width=True)
     
     with c2:
         if layout_url: st.image(layout_url, use_container_width=True)
-        st.metric("Final Selling Price", f"{selling_price:,.2f} AED")
         pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
-        st.download_button("Download PDF", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True)
+        st.download_button("Download PDF Offer", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
