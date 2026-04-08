@@ -6,17 +6,25 @@ from io import BytesIO
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-# --- 1. قاعدة بيانات المشاريع مع إعدادات الرسوم الحكومية ---
+# --- 1. قاعدة بيانات المشاريع (تمت إضافة رسوم الحجز ومشروع SENSI) ---
 PROJECTS_DATABASE = {
     "SILA MASDAR": {
         "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=0&single=true&output=csv",
-        "gov_pct": 2.0,      # نسبة الرسوم (مثلاً 2%)
-        "admin_fees": 625    # رسوم إدارية إضافية
+        "gov_pct": 2.0,      
+        "admin_fees": 625,
+        "res_fee": 20000     # رسوم الحجز الافتراضية
     },
     "KHALIFA CITY": {
         "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1491192679&single=true&output=csv",
-        "gov_pct": 1.0,      # 2%
-        "admin_fees": 625    # مصاريف إدارية ثابتة لخليفة سيتي
+        "gov_pct": 2.0,      
+        "admin_fees": 625,
+        "res_fee": 20000     # رسوم الحجز الافتراضية
+    },
+    "SENSI": {
+        "url":  " https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1661552566&single=true&output=csv"
+        "gov_pct": 2.0,      # عدل النسبة حسب الإمارة (مثلاً دبي 4%)
+        "admin_fees": 625,  # عدل المصاريف الإدارية
+        "res_fee": 50000     # رسوم الحجز الخاصة بسينسي
     }
 }
 
@@ -52,9 +60,10 @@ def load_google_sheet(url):
     except Exception as e:
         return None
 
-def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date, handover_date):
+# --- تعديل الدالة لاستقبال res_fee كمتغير ---
+def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date, handover_date, res_fee):
     plan = []
-    res_fee = 20000
+    
     plan.append({"Milestone": "Reservation Fee (Booking)", "Date": "Now", "Percent": "-", "Amount": res_fee})
     
     dp_pct = plan_cfg['dp_pct']
@@ -109,17 +118,13 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     pdf.cell(0, 15, f"SALES OFFER - {project_name}", ln=True, align='C')
     pdf.ln(5)
 
-    # إزالة الصورة من هنا لنقلها للأسفل
-
     pdf.set_xy(10, 35)
     pdf.set_fill_color(240, 240, 240)
     pdf.set_font("Arial", 'B', 11)
     
-    # توسيع عرض المواصفات طالما شلنا الصورة من الجنب
     pdf.cell(190, 8, " UNIT SPECIFICATIONS", 0, 1, 'L', True)
     pdf.set_font("Arial", size=10); pdf.set_text_color(0)
     
-    # عرض المواصفات في عمودين لاستغلال المساحة بشكل أفضل
     pdf.cell(95, 6, f" Unit No: {unit_data.get('Plot + Unit No.', 'N/A')}", 0, 0)
     pdf.cell(95, 6, f" Sub-type: {unit_data.get('Sub-type', 'N/A')}", 0, 1)
     
@@ -147,7 +152,6 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
     
     pdf.ln(8)
     pdf.set_font("Arial", 'B', 10); pdf.set_fill_color(44, 62, 80); pdf.set_text_color(255, 255, 255)
-    # توسيع عرض الجدول ليتناسب مع الصفحة كاملة
     pdf.cell(70, 10, " Milestone", 1, 0, 'L', True); pdf.cell(40, 10, " Date", 1, 0, 'C', True)
     pdf.cell(20, 10, " %", 1, 0, 'C', True); pdf.cell(60, 10, " Amount (AED)", 1, 1, 'R', True)
 
@@ -166,17 +170,15 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
             pdf.cell(20, 8, f" {row['Percent']}", 1, 0, 'C')
             pdf.cell(60, 8, f"{row['Amount']:,.2f} ", 1, 1, 'R')
             
-    # --- إضافة الصورة هنا تحت الجدول وبحجم كبير ---
     if layout_url and str(layout_url) != 'nan':
         try:
             headers = {'User-Agent': 'Mozilla/5.0'}
             response = requests.get(layout_url, headers=headers, timeout=10)
             img_data = BytesIO(response.content)
             
-            pdf.ln(10) # مسافة بعد الجدول
+            pdf.ln(10)
             y_pos = pdf.get_y()
             
-            # التأكد من وجود مساحة كافية للصورة، لو مفيش نفتح صفحة جديدة
             if y_pos > 180: 
                 pdf.add_page()
                 y_pos = 20
@@ -185,7 +187,6 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
             pdf.cell(0, 10, "UNIT LAYOUT", ln=True, align='C')
             y_pos = pdf.get_y() + 5
             
-            # عرض الصفحة 210mm، لعرض الصورة بحجم 150 نقوم بوضعها في المنتصف (210 - 150) / 2 = 30
             pdf.image(img_data, x=30, y=y_pos, w=150)
         except Exception as e: 
             pass
@@ -235,7 +236,10 @@ if df_inventory is not None:
     }
     
     settings = {'dp_months': dp_m, 'monthly_pct': m_pct, 'recovery_freq': r_freq, 'recovery_pct': r_pct}
-    schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), handover_finish_date)
+    
+    # --- تمرير قيمة رسوم الحجز (res_fee) الخاصة بالمشروع للدالة ---
+    project_res_fee = proj_info.get("res_fee", 20000) 
+    schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), handover_finish_date, project_res_fee)
 
     try:
         p_key = selected_project.split()[0].upper()
@@ -254,7 +258,6 @@ if df_inventory is not None:
 
     st.subheader(f"📊 Payment Schedule - {unit_id}")
     
-    # عرض الجدول وزر التحميل أولاً
     c1, c2 = st.columns([3, 1])
     with c1:
         st.dataframe(pd.DataFrame(schedule).style.format({"Amount": "{:,.2f}"}), use_container_width=True)
@@ -262,11 +265,9 @@ if df_inventory is not None:
         pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
         st.download_button("Download PDF Offer", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
         
-    # عرض الصورة تحت الجدول بحجم كبير في الموقع أيضاً
     if layout_url:
         st.divider()
         st.subheader("🖼️ Unit Layout")
-        # وضع الصورة في عمود وسطي لتبدو أنيقة وكبيرة
         _, img_col, _ = st.columns([1, 4, 1])
         with img_col:
             st.image(layout_url, use_container_width=True)
