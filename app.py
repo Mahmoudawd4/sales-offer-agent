@@ -21,7 +21,7 @@ PROJECTS_DATABASE = {
         "res_fee": 20000     # رسوم الحجز الافتراضية
     },
     "SENSI": {
-        "url":  " https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1661552566&single=true&output=csv"
+        "url":  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1661552566&single=true&output=csv"
         "gov_pct": 2.0,
         "admin_fees": 625,  # عدل المصاريف الإدارية
         "res_fee": 50000     # رسوم الحجز الخاصة بسينسي
