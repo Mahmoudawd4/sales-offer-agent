@@ -16,7 +16,7 @@ PROJECTS_DATABASE = {
     },
     "KHALIFA CITY": {
         "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1491192679&single=true&output=csv",
-        "gov_pct": 2.0,
+        "gov_pct": 1.0,
         "admin_fees": 625,
         "res_fee": 20000
     },
