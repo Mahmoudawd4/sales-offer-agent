@@ -61,14 +61,13 @@ ALL_PLANS = {
 def load_google_sheet(url):
     try:
         df = pd.read_csv(url)
-        df.columns = df.columns.str.strip() # تنظيف أسماء الأعمدة من المسافات
+        df.columns = df.columns.str.strip() 
         df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
         return df
     except:
         return None
 
 def get_handover_date(unit_data):
-    # البحث عن تاريخ التسليم في أعمدة مختلفة لتفادي اختلاف المسميات في الشيتات الجديدة
     for col in ['Handover Date', 'Handover', 'Completion', 'Completion Date', 'HANDOVER DATE']:
         val = unit_data.get(col)
         if val and str(val).lower() != 'nan':
@@ -76,7 +75,7 @@ def get_handover_date(unit_data):
                 return pd.to_datetime(val).date()
             except:
                 continue
-    return date(2029, 9, 1) # تاريخ افتراضي في حالة الفشل
+    return date(2029, 9, 1) 
 
 def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date, handover_date, res_fee):
     plan = []
@@ -198,7 +197,6 @@ if df_inventory is not None:
     unit_id = st.selectbox("Unit:", df_inventory['Plot + Unit No.'].unique())
     unit_data = df_inventory[df_inventory['Plot + Unit No.'] == unit_id].iloc[0]
     
-    # محاولة جلب تاريخ التسليم بشكل صحيح
     h_date = get_handover_date(unit_data)
     
     u_price = float(str(unit_data.get('Original Price (AED)', '0')).replace(',', ''))
@@ -210,17 +208,39 @@ if df_inventory is not None:
     settings = {'dp_months': dp_m, 'monthly_pct': m_pct, 'recovery_freq': r_freq, 'recovery_pct': r_pct}
     schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), h_date, proj_info["res_fee"])
     
-    # تحسين البحث عن الصورة لمشاريع SENSI و RHILLS
-    try:
-        p_key = selected_project.upper() # استخدام اسم المشروع بالكامل للبحث
-        match = df_photos[
-            (df_photos['Project'].astype(str).str.upper().str.contains(p_key)) & 
-            (df_photos['Bedrooms'].astype(str) == str(unit_data['Bedrooms'])) & 
-            (df_photos['Sub-type'].astype(str) == str(unit_data['Sub-type']))
-        ]
-        layout_url = match.iloc[0]['Layout_URL'] if not match.empty else None
-    except: 
-        layout_url = None
+    # --- البحث الذكي عن الصور (Smart Image Search) ---
+    layout_url = None
+    if df_photos is not None:
+        try:
+            # 1. نأخذ أول كلمة فقط من المشروع (SILA, KHALIFA, SENSI)
+            p_key = selected_project.split()[0].upper()
+            
+            # 2. تنظيف البيانات من المسافات وعلامات الدوت زيرو (.0)
+            df_photos['clean_proj'] = df_photos['Project'].astype(str).str.upper().str.strip()
+            df_photos['clean_bed'] = df_photos['Bedrooms'].astype(str).str.replace('.0', '', regex=False).str.strip()
+            df_photos['clean_sub'] = df_photos['Sub-type'].astype(str).str.upper().str.strip()
+            
+            unit_bed = str(unit_data.get('Bedrooms', '')).replace('.0', '').strip()
+            unit_sub = str(unit_data.get('Sub-type', '')).upper().strip()
+
+            # المحاولة الأولى: تطابق دقيق (مشروع + غرف + Sub-type)
+            match = df_photos[
+                (df_photos['clean_proj'].str.contains(p_key)) & 
+                (df_photos['clean_bed'] == unit_bed) & 
+                (df_photos['clean_sub'] == unit_sub)
+            ]
+            
+            # المحاولة الثانية: لو مفيش تطابق دقيق، هات أي صورة لنفس المشروع ونفس عدد الغرف (تجاهل الـ Sub-type)
+            if match.empty:
+                match = df_photos[
+                    (df_photos['clean_proj'].str.contains(p_key)) & 
+                    (df_photos['clean_bed'] == unit_bed)
+                ]
+
+            if not match.empty:
+                layout_url = match.iloc[0]['Layout_URL']
+        except Exception as e: 
+            layout_url = None
 
     st.divider()
     m1, m2, m3 = st.columns(3)
@@ -243,4 +263,4 @@ if df_inventory is not None:
         with img_col: 
             st.image(layout_url, use_container_width=True)
     else:
-        st.info("No Layout found in Photo Bank for this unit type.")
+        st.info("No Layout found in Photo Bank for this project and bedroom type.")
