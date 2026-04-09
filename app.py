@@ -6,7 +6,7 @@ from io import BytesIO
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-# --- 1. قاعدة بيانات المشاريع (تمت إضافة RHILLS) ---
+# --- 1. قاعدة بيانات المشاريع ---
 PROJECTS_DATABASE = {
     "SILA MASDAR": {
         "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=0&single=true&output=csv",
@@ -21,7 +21,7 @@ PROJECTS_DATABASE = {
         "res_fee": 20000
     },
     "SENSI": {
-        "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=0&single=true&output=csv", # استبدله برابط سينسي الصحيح
+        "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=0&single=true&output=csv", 
         "gov_pct": 2.0,
         "admin_fees": 625,
         "res_fee": 50000
@@ -30,7 +30,7 @@ PROJECTS_DATABASE = {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=517225281&single=true&output=csv",
         "gov_pct": 4.0,
         "admin_fees": 1194,
-        "res_fee": 20000 # يمكنك تغييرها إذا كانت مختلفة
+        "res_fee": 20000 
     }
 }
 
@@ -61,10 +61,22 @@ ALL_PLANS = {
 def load_google_sheet(url):
     try:
         df = pd.read_csv(url)
+        df.columns = df.columns.str.strip() # تنظيف أسماء الأعمدة من المسافات
         df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
         return df
     except:
         return None
+
+def get_handover_date(unit_data):
+    # البحث عن تاريخ التسليم في أعمدة مختلفة لتفادي اختلاف المسميات في الشيتات الجديدة
+    for col in ['Handover Date', 'Handover', 'Completion', 'Completion Date', 'HANDOVER DATE']:
+        val = unit_data.get(col)
+        if val and str(val).lower() != 'nan':
+            try:
+                return pd.to_datetime(val).date()
+            except:
+                continue
+    return date(2029, 9, 1) # تاريخ افتراضي في حالة الفشل
 
 def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date, handover_date, res_fee):
     plan = []
@@ -185,33 +197,50 @@ with st.sidebar:
 if df_inventory is not None:
     unit_id = st.selectbox("Unit:", df_inventory['Plot + Unit No.'].unique())
     unit_data = df_inventory[df_inventory['Plot + Unit No.'] == unit_id].iloc[0]
+    
+    # محاولة جلب تاريخ التسليم بشكل صحيح
+    h_date = get_handover_date(unit_data)
+    
     u_price = float(str(unit_data.get('Original Price (AED)', '0')).replace(',', ''))
     total_disc_pct = ALL_PLANS[selected_plan]['disc'] + extra_disc
     selling_price = (u_price * (1 - total_disc_pct/100)) + float(str(unit_data.get('parking', '0')).replace(',', ''))
     gov_fees = (selling_price * (proj_info["gov_pct"] / 100)) + proj_info["admin_fees"]
-    try: h_date = pd.to_datetime(unit_data.get('Handover Date', '2029-09-01')).date()
-    except: h_date = date(2029, 9, 1)
+    
     financials = {'u_price': u_price, 'disc_pct': total_disc_pct, 'disc_val': u_price * (total_disc_pct/100), 'selling_price': selling_price, 'gov_fees': gov_fees}
     settings = {'dp_months': dp_m, 'monthly_pct': m_pct, 'recovery_freq': r_freq, 'recovery_pct': r_pct}
     schedule = calculate_ultra_flexible_plan(selling_price, ALL_PLANS[selected_plan], settings, date.today(), h_date, proj_info["res_fee"])
+    
+    # تحسين البحث عن الصورة لمشاريع SENSI و RHILLS
     try:
-        p_key = selected_project.split()[0].upper()
-        match = df_photos[(df_photos['Project'].astype(str).str.upper().str.contains(p_key)) & (df_photos['Bedrooms'].astype(str) == str(unit_data['Bedrooms'])) & (df_photos['Sub-type'].astype(str) == str(unit_data['Sub-type']))]
+        p_key = selected_project.upper() # استخدام اسم المشروع بالكامل للبحث
+        match = df_photos[
+            (df_photos['Project'].astype(str).str.upper().str.contains(p_key)) & 
+            (df_photos['Bedrooms'].astype(str) == str(unit_data['Bedrooms'])) & 
+            (df_photos['Sub-type'].astype(str) == str(unit_data['Sub-type']))
+        ]
         layout_url = match.iloc[0]['Layout_URL'] if not match.empty else None
-    except: layout_url = None
+    except: 
+        layout_url = None
+
     st.divider()
     m1, m2, m3 = st.columns(3)
     m1.metric("Selling Price", f"{selling_price:,.2f} AED")
-    m2.metric("Gov. Fees", f"{gov_fees:,.2f} AED")
+    m2.metric("Gov. Fees", f"{gov_fees:,.2f} AED", delta=f"{h_date.strftime('%b %Y')} Handover")
     m3.metric("Total Payable", f"{selling_price + gov_fees:,.2f} AED")
+    
     st.subheader(f"📊 Payment Schedule - {unit_id}")
     c1, c2 = st.columns([3, 1])
-    with c1: st.dataframe(pd.DataFrame(schedule).style.format({"Amount": "{:,.2f}"}), use_container_width=True)
+    with c1: 
+        st.dataframe(pd.DataFrame(schedule).style.format({"Amount": "{:,.2f}"}), use_container_width=True)
     with c2:
         pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
         st.download_button("Download PDF", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
+    
     if layout_url:
         st.divider()
         st.subheader("🖼️ Unit Layout")
         _, img_col, _ = st.columns([1, 4, 1])
-        with img_col: st.image(layout_url, use_container_width=True)
+        with img_col: 
+            st.image(layout_url, use_container_width=True)
+    else:
+        st.info("No Layout found in Photo Bank for this unit type.")
