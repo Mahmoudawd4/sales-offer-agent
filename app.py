@@ -153,6 +153,31 @@ PROJECTS_DATABASE = {
 
 
     }
+    ,
+
+
+
+    "BAIA-RAHA": {
+
+
+
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=2096076774&single=true&output=csv",
+
+
+
+        "gov_pct": 2,
+
+
+
+        "admin_fees": 625,
+
+
+
+        "res_fee": 50000 
+
+
+
+    }
 
 
 
