@@ -178,6 +178,31 @@ PROJECTS_DATABASE = {
 
 
     }
+    ,
+
+
+
+    "TAORMINA1 and TAORMINA2": {
+
+
+
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=689409724&single=true&output=csv",
+
+
+
+        "gov_pct": 4.0,
+
+
+
+        "admin_fees": 1194,
+
+
+
+        "res_fee": 20000 
+
+
+
+    }
 
 
 
