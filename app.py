@@ -1221,11 +1221,11 @@ if df_inventory is not None:
 
 
 
-    with c2:
+    #with c2:
 
 
 
-        pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
+        #pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
 
 
 
