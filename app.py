@@ -375,6 +375,7 @@ ALL_PLANS = {
 
 
     "10% DP / 5% Disc / 1% Monthly": {"dp_pct": 10, "disc": 5, "default_monthly": 1.0},
+    "10% DP / 0% Disc / 1% Monthly": {"dp_pct": 10, "disc": 0, "default_monthly": 1.0},
 
 
 
