@@ -1231,37 +1231,23 @@ if df_inventory is not None:
 
         #st.download_button("Download PDF", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
         with c2:
-        # توليد ملف PDF (الكود القديم بتاعك)
+        # تأكد إن كل السطور اللي تحت "with" واخدة مسافة لجوه (Indentation)
         pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
         
-        # 1. زرار التحميل
         st.download_button(
-            "Download PDF", 
+            label="Download PDF", 
             data=bytes(pdf_bytes), 
             file_name=f"Offer_{unit_id}.pdf", 
             use_container_width=True, 
             type="primary"
         )
 
-        # 2. زرار الواتساب (الإضافة الجديدة)
+        # إضافة زرار الواتساب (لازم يكون واخد نفس المسافة)
         wa_link = create_whatsapp_link(unit_id, selling_price, selected_project)
         
         st.markdown(f"""
             <a href="{wa_link}" target="_blank" style="text-decoration: none;">
-                <div style="
-                    background-color: #25D366;
-                    color: white;
-                    padding: 10px;
-                    border-radius: 5px;
-                    text-align: center;
-                    font-weight: bold;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 10px;
-                    margin-top: 10px;
-                    transition: 0.3s;
-                ">
+                <div style="background-color: #25D366; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20">
                     Share on WhatsApp
                 </div>
