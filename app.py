@@ -359,6 +359,7 @@ ALL_PLANS = {
 
 
     "30% DP / 5% Disc / 70% Handover": {"dp_pct": 30, "disc": 5, "default_monthly": 0.0},
+    "30% DP / 0% Disc / 70% Handover": {"dp_pct": 30, "disc": 0, "default_monthly": 0.0},
 
 
 
@@ -380,6 +381,7 @@ ALL_PLANS = {
 
 
     "20% DP / 15% Disc / 1% Monthly": {"dp_pct": 20, "disc": 15, "default_monthly": 1.0},
+    "20% DP / 5% Disc / 1% Monthly": {"dp_pct": 20, "disc": 5, "default_monthly": 1.0},
 
 
 
@@ -392,6 +394,7 @@ ALL_PLANS = {
 
 
     "30% DP / 15% Disc / 1% Monthly": {"dp_pct": 30, "disc": 15, "default_monthly": 1.0},
+    "30% DP / 10% Disc / 1% Monthly": {"dp_pct": 30, "disc": 10, "default_monthly": 1.0},
 
 
 
@@ -408,6 +411,7 @@ ALL_PLANS = {
 
 
     "30% Discount Cash": {"dp_pct": 100, "disc": 30, "default_monthly": 0.0},
+    "35% Discount Cash": {"dp_pct": 100, "disc": 35, "default_monthly": 0.0},
 
 
 
@@ -419,7 +423,7 @@ ALL_PLANS = {
 
 
 
-    "Plan 12 (Cash 40% Disc)": {"dp_pct": 100, "disc": 40, "default_monthly": 0.0}
+    "40% DISCOUNT Plan 12 (Cash 40% Disc)": {"dp_pct": 100, "disc": 40, "default_monthly": 0.0}
 
 
 
