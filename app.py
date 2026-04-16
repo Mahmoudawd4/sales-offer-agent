@@ -323,8 +323,13 @@ PROJECTS_DATABASE = {
         "gov_pct": 4.0,
         "admin_fees": 1194,
         "res_fee": 20000 
+    },
+    "VERDANA 5 R": {
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1269333085&single=true&output=csv",
+        "gov_pct": 4.0,
+        "admin_fees": 1194,
+        "res_fee": 20000 
     }
-
 }
 
 
