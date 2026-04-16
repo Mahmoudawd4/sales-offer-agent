@@ -2,7 +2,6 @@ import streamlit as st
 
 import pandas as pd
 
-import urllib.parse  # ضيف السطر ده هنا
 
 from fpdf import FPDF
 
@@ -901,17 +900,7 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
 
 
 
-def create_whatsapp_link(unit_id, selling_price, project_name):
-    # نص الرسالة اللي هيتبعت
-    message = f"مرحباً، أود الاستفسار عن عرض السعر الخاص بالوحدة: {unit_id}\n"
-    message += f"المشروع: {project_name}\n"
-    message += f"السعر النهائي: {selling_price:,.2f} AED\n"
-    message += "العرض مرفق كملف PDF."
-    
-    # تحويل النص لرابط
-    encoded_msg = urllib.parse.quote(message)
-    return f"https://wa.me/?text={encoded_msg}"
-    
+
 
 st.set_page_config(page_title="Reportage Smart Agent", layout="wide")
 
@@ -1221,38 +1210,16 @@ if df_inventory is not None:
 
 
 
-    #with c2:
-
-
-
-        #pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
-
-
-
-        #st.download_button("Download PDF", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
     with c2:
-        # تأكد إن كل السطور اللي تحت "with" واخدة مسافة لجوه (Indentation)
-        pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
-        
-        st.download_button(
-            label="Download PDF", 
-            data=bytes(pdf_bytes), 
-            file_name=f"Offer_{unit_id}.pdf", 
-            use_container_width=True, 
-            type="primary"
-        )
 
-        # إضافة زرار الواتساب (لازم يكون واخد نفس المسافة)
-        wa_link = create_whatsapp_link(unit_id, selling_price, selected_project)
-        
-        st.markdown(f"""
-            <a href="{wa_link}" target="_blank" style="text-decoration: none;">
-                <div style="background-color: #25D366; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20">
-                    Share on WhatsApp
-                </div>
-            </a>
-            """, unsafe_allow_html=True)
+
+
+        pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
+
+
+
+        st.download_button("Download PDF", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
+
 
 
     
