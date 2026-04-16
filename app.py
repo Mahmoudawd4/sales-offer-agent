@@ -1230,7 +1230,7 @@ if df_inventory is not None:
 
 
         #st.download_button("Download PDF", data=bytes(pdf_bytes), file_name=f"Offer_{unit_id}.pdf", use_container_width=True, type="primary")
-        with c2:
+    with c2:
         # تأكد إن كل السطور اللي تحت "with" واخدة مسافة لجوه (Indentation)
         pdf_bytes = create_sales_offer_pdf(unit_data, financials, schedule, layout_url, selected_plan, selected_project)
         
