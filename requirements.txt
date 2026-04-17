@@ -1,5 +1,6 @@
 streamlit
 pandas
-fpdf2
-openpyxl
+fpdf
+requests
 python-dateutil
+plotly
