@@ -343,7 +343,7 @@ PHOTO_BANK_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1
 
 
 
-LOGO_URL = "https://i.ibb.co/3sbsK2S/Reportage-Logo.png"
+LOGO_URL = "https://i.ibb.co/N2SSy8kX/ICON-BLACK.jpg"
 
 
 
