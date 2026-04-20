@@ -329,7 +329,14 @@ PROJECTS_DATABASE = {
         "gov_pct": 4.0,
         "admin_fees": 1194,
         "res_fee": 20000 
-    }
+    },
+     "MANAGEMENT UNITS": {
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1704395837&single=true&output=csv",
+        "gov_pct": 2.0,
+        "admin_fees": 5625,
+        "res_fee": 20000 
+    },
+    
     
 }
 
@@ -382,6 +389,7 @@ ALL_PLANS = {
 
 
     "20% DP / 15% Disc / 1% Monthly": {"dp_pct": 20, "disc": 15, "default_monthly": 1.0},
+    "15% DP / 15% Disc / 1% Monthly": {"dp_pct": 15, "disc": 15, "default_monthly": 1.0},
     "20% DP / 5% Disc / 1% Monthly": {"dp_pct": 20, "disc": 5, "default_monthly": 1.0},
 
 
