@@ -497,7 +497,7 @@ def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date,
     plan = []
     plan.append({"Milestone": "Reservation Fee (Booking)", "Date": "Now", "Percent": "-", "Amount": res_fee})
 
-    # --- حساب المقدم ---
+    # --- 1. حساب المقدم (Down Payment) ثابت لكل الخطط ---
     dp_pct = plan_cfg['dp_pct']
     total_dp_val = (selling_price * (dp_pct / 100))
     dp_after_booking = max(0, total_dp_val - res_fee)
@@ -511,35 +511,43 @@ def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date,
         else:
             plan.append({"Milestone": "DP Balance Payment", "Date": start_date.strftime("%b-%y"), "Percent": f"{dp_pct}%", "Amount": dp_after_booking})
 
-    # --- حساب دفعة الاستلام (Handover) لو موجودة في الخطة ---
+    # --- 2. التفرقة بين الخطط الجديدة (100 شهر) والخطط القديمة ---
     ho_pct = plan_cfg.get("ho_pct", 0)
-    ho_amount = selling_price * (ho_pct / 100)
-
-    # --- حساب الأقساط الشهرية ---
+    total_months = plan_cfg.get('installments_count', 0)
     monthly_pct = settings['monthly_pct'] / 100
     curr_d = start_date + relativedelta(months=max(1, dp_months))
-    
-    # سنستمر في إضافة أقساط حتى الوصول لتاريخ الاستلام
-    while curr_d < handover_date:
-        amt = selling_price * monthly_pct
-        if amt > 0:
-            plan.append({"Milestone": "Monthly Installment", "Date": curr_d.strftime("%b-%y"), "Percent": f"{settings['monthly_pct']}%", "Amount": amt})
-        curr_d += relativedelta(months=1)
 
-    # --- حساب الإجمالي المجدول حالياً ---
-    total_inst = sum(item['Amount'] for item in plan)
-    
-    # إضافة سطر المجموع (اختياري)
-    plan.append({"Milestone": "TOTAL INSTALLMENT", "Date": "---", "Percent": "---", "Amount": total_inst})
+    if ho_pct > 0 and total_months > 0:
+        # >>> نظام الخطط الجديدة (تكمل 100 شهر والدفعة في النص) <<<
+        for m in range(1, total_months + 1):
+            amt = selling_price * monthly_pct
+            plan.append({"Milestone": f"Monthly Installment {m}", "Date": curr_d.strftime("%b-%y"), "Percent": f"{settings['monthly_pct']}%", "Amount": amt})
+            
+            # إضافة دفعة الاستلام لما نوصل لتاريخها
+            if curr_d.year == handover_date.year and curr_d.month == handover_date.month:
+                ho_amount = selling_price * (ho_pct / 100)
+                plan.append({"Milestone": "HANDOVER PAYMENT", "Date": curr_d.strftime("%b-%y"), "Percent": f"{ho_pct}%", "Amount": ho_amount})
+            
+            curr_d += relativedelta(months=1)
+    else:
+        # >>> نظام الخطط القديمة (تقف عند الاستلام والباقي Balance) <<<
+        while curr_d < handover_date:
+            amt = selling_price * monthly_pct
+            if amt > 0:
+                plan.append({"Milestone": "Monthly Installment", "Date": curr_d.strftime("%b-%y"), "Percent": f"{settings['monthly_pct']}%", "Amount": amt})
+            curr_d += relativedelta(months=1)
 
-    # --- أهم جزء: حساب المبلغ المتبقي (اللي هو هيكون الـ 10% HO + أي متبقي آخر) ---
-    handover_amt = selling_price - total_inst
-    
-    if handover_amt > 1:
-        plan.append({"Milestone": "Balance on Handover", "Date": handover_date.strftime("%b-%y"), "Percent": "Balance", "Amount": handover_amt})
+        # حساب المتبقي (الـ Balance) كدفعة أخيرة عند الاستلام
+        total_so_far = sum(item['Amount'] for item in plan)
+        handover_amt = selling_price - total_so_far
+        if handover_amt > 1:
+            plan.append({"Milestone": "Balance on Handover", "Date": handover_date.strftime("%b-%y"), "Percent": "Balance", "Amount": handover_amt})
+
+    # سطر المجموع النهائي لضمان دقة الحسابات
+    total_final = sum(item['Amount'] for item in plan)
+    plan.append({"Milestone": "TOTAL PAYABLE", "Date": "---", "Percent": "100%", "Amount": total_final})
 
     return plan
-
 
 
 
