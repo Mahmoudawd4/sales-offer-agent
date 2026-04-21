@@ -370,8 +370,20 @@ LOGO_URL = "https://i.ibb.co/N2SSy8kX/ICON-BLACK.jpg"
 
 ALL_PLANS = {
 
-    "10% DP / 10% Disc / 10% HO / 100 Months": {"dp_pct": 10, "disc": 10, "ho_pct": 10, "default_monthly": 0.8},
-    "15% DP / 15% Disc / 10% HO / 100 Months": {"dp_pct": 15, "disc": 15, "ho_pct": 10, "default_monthly": 0.75},
+    "10% DP / 10% Disc / 10% HO / 100 Months": {
+        "dp_pct": 10, 
+        "disc": 10, 
+        "ho_pct": 10,           # دفعة الاستلام
+        "installments_count": 100, 
+        "default_monthly": 0.8  # (100% - 10% DP - 10% HO) / 100
+    },
+    "15% DP / 15% Disc / 10% HO / 100 Months": {
+        "dp_pct": 15, 
+        "disc": 15, 
+        "ho_pct": 10,           # دفعة الاستلام
+        "installments_count": 100, 
+        "default_monthly": 0.75 # (100% - 15% DP - 10% HO) / 100
+    },
     "30% DP / 5% Disc / 70% Handover": {"dp_pct": 30, "disc": 5, "default_monthly": 0.0},
     "30% DP / 0% Disc / 70% Handover": {"dp_pct": 30, "disc": 0, "default_monthly": 0.0},
     "5% DP / 5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 5, "default_monthly": 1.0},
