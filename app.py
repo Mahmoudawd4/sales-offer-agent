@@ -545,14 +545,19 @@ def calculate_ultra_flexible_plan(selling_price, plan_cfg, settings, start_date,
 
     # --- 3. إضافة سطور الإجماليات (Totals) ---
     
-    # حساب إجمالي الأقساط (بدون دفعة الاستلام) لبيان الـ "TOTAL INSTALLMENT"
-    # ملحوظة: في الخطط الجديدة، الـ TOTAL INSTALLMENT هيشمل (المقدم + الـ 100 قسط)
-    total_inst = sum(item['Amount'] for item in plan if "HANDOVER" not in item['Milestone'] and "Balance" not in item['Milestone'])
-    plan.append({"Milestone": "TOTAL INSTALLMENT", "Date": "---", "Percent": "---", "Amount": total_inst})
+    # حساب TOTAL INSTALLMENT: نجمع كل السطور التي تم إنشاؤها (تشمل DP و Monthly) 
+    # ونستثني فقط السطور التي تمثل دفعة الاستلام (HANDOVER أو Balance)
+    total_inst_val = 0
+    for item in plan:
+        m_name = item['Milestone'].upper()
+        if "HANDOVER" not in m_name and "BALANCE" not in m_name:
+            total_inst_val += item['Amount']
 
-    # حساب الإجمالي النهائي الفعلي (Total Payable) لضمان أن المجموع 100%
-    total_final = sum(item['Amount'] for item in plan if "TOTAL" not in item['Milestone'])
-    plan.append({"Milestone": "TOTAL PAYABLE", "Date": "---", "Percent": "100%", "Amount": total_final})
+    plan.append({"Milestone": "TOTAL INSTALLMENT", "Date": "---", "Percent": "---", "Amount": total_inst_val})
+
+    # حساب الإجمالي النهائي الفعلي (Total Payable)
+    total_payable_val = sum(item['Amount'] for item in plan if "TOTAL" not in item['Milestone'])
+    plan.append({"Milestone": "TOTAL PAYABLE", "Date": "---", "Percent": "100%", "Amount": total_payable_val})
 
     return plan
 
