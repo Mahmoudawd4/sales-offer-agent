@@ -336,6 +336,12 @@ PROJECTS_DATABASE = {
         "admin_fees": 5625,
         "res_fee": 20000 
     },
+     "HoryaTH": {
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1841704215&single=true&output=csv",
+        "gov_pct": 10.0,
+        "admin_fees": 0,
+        "res_fee": 20000 
+    },
     
     
 }
