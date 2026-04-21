@@ -370,74 +370,29 @@ LOGO_URL = "https://i.ibb.co/N2SSy8kX/ICON-BLACK.jpg"
 
 ALL_PLANS = {
 
-
-
+    "10% DP / 10% Disc / 10% HO / 100 Months": {"dp_pct": 10, "disc": 10, "ho_pct": 10, "default_monthly": 0.8},
+    "15% DP / 15% Disc / 10% HO / 100 Months": {"dp_pct": 15, "disc": 15, "ho_pct": 10, "default_monthly": 0.75},
     "30% DP / 5% Disc / 70% Handover": {"dp_pct": 30, "disc": 5, "default_monthly": 0.0},
     "30% DP / 0% Disc / 70% Handover": {"dp_pct": 30, "disc": 0, "default_monthly": 0.0},
-
-
-
     "5% DP / 5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 5, "default_monthly": 1.0},
-
-
-
     "5% DP / 0% Disc / 1% Monthly": {"dp_pct": 5, "disc": 0, "default_monthly": 1.0},
-
-
-
     "5% DP / 2.5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 2.5, "default_monthly": 1.0},
-
-
-
     "10% DP / 5% Disc / 1% Monthly": {"dp_pct": 10, "disc": 5, "default_monthly": 1.0},
     "10% DP / 0% Disc / 1% Monthly": {"dp_pct": 10, "disc": 0, "default_monthly": 1.0},
-
-
-
     "20% DP / 15% Disc / 1% Monthly": {"dp_pct": 20, "disc": 15, "default_monthly": 1.0},
     "15% DP / 15% Disc / 1% Monthly": {"dp_pct": 15, "disc": 15, "default_monthly": 1.0},
     "20% DP / 5% Disc / 1% Monthly": {"dp_pct": 20, "disc": 5, "default_monthly": 1.0},
-
-
-
     "10% DP / 10% Disc / 1% Monthly": {"dp_pct": 10, "disc": 10, "default_monthly": 1.0},
-
-
-
     "20% DP / 10% Disc / 1% Monthly": {"dp_pct": 20, "disc": 10, "default_monthly": 1.0},
-
-
-
     "30% DP / 15% Disc / 1% Monthly": {"dp_pct": 30, "disc": 15, "default_monthly": 1.0},
     "30% DP / 10% Disc / 1% Monthly": {"dp_pct": 30, "disc": 10, "default_monthly": 1.0},
-
-
-
     "20% DP / 80% Handover (No Disc)": {"dp_pct": 20, "disc": 0, "default_monthly": 0.0},
-
-
-
     "20% DP / 2% Disc / 10%@12m / 70% HO": {"dp_pct": 20, "disc": 2, "default_monthly": 0.0, "is_special": True},
-
-
-
     "25% Discount Cash": {"dp_pct": 100, "disc": 25, "default_monthly": 0.0},
-
-
-
     "30% Discount Cash": {"dp_pct": 100, "disc": 30, "default_monthly": 0.0},
     "35% Discount Cash": {"dp_pct": 100, "disc": 35, "default_monthly": 0.0},
-
-
-
     "18% Discount Cash": {"dp_pct": 100, "disc": 18, "default_monthly": 0.0},
-
-
-
     "No discount (Full in 1 month)": {"dp_pct": 100, "disc": 0, "default_monthly": 0.0},
-
-
-
     "40% DISCOUNT Plan 12 (Cash 40% Disc)": {"dp_pct": 100, "disc": 40, "default_monthly": 0.0}
 
 
