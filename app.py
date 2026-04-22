@@ -342,6 +342,13 @@ PROJECTS_DATABASE = {
         "admin_fees": 0,
         "res_fee": 20000 
     },
+    ,
+     "Horya Chalet": {
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=715137464&single=true&output=csv",
+        "gov_pct": 10.0,
+        "admin_fees": 0,
+        "res_fee": 20000 
+    },
     
     
 }
@@ -385,6 +392,8 @@ ALL_PLANS = {
     "20% DP / 10% Disc / 1% Monthly": {"dp_pct": 20, "disc": 10, "default_monthly": 1.0},
     "30% DP / 15% Disc / 1% Monthly": {"dp_pct": 30, "disc": 15, "default_monthly": 1.0},
     "30% DP / 10% Disc / 1% Monthly": {"dp_pct": 30, "disc": 10, "default_monthly": 1.0},
+    "25% DP / 25% Disc / 1% Monthly": {"dp_pct": 25, "disc": 25, "default_monthly": 1.0},
+    "20% DP / 20% Disc / 1% Monthly": {"dp_pct": 20, "disc": 20, "default_monthly": 1.0},
     "20% DP / 80% Handover (No Disc)": {"dp_pct": 20, "disc": 0, "default_monthly": 0.0},
     "20% DP / 2% Disc / 10%@12m / 70% HO": {"dp_pct": 20, "disc": 2, "default_monthly": 0.0, "is_special": True},
     "25% Discount Cash": {"dp_pct": 100, "disc": 25, "default_monthly": 0.0},
