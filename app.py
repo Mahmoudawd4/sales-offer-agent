@@ -342,7 +342,7 @@ PROJECTS_DATABASE = {
         "admin_fees": 0,
         "res_fee": 20000 
     },
-    ,
+    
      "Horya Chalet": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=715137464&single=true&output=csv",
         "gov_pct": 10.0,
