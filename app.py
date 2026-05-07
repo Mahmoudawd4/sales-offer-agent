@@ -389,10 +389,11 @@ LOGO_URL = "https://i.ibb.co/N2SSy8kX/ICON-BLACK.jpg"
 
 ALL_PLANS = {
 
-    
     "30% DP / 5% Disc / 70% Handover": {"dp_pct": 30, "disc": 5, "default_monthly": 0.0},
     "30% DP / 0% Disc / 70% Handover": {"dp_pct": 30, "disc": 0, "default_monthly": 0.0},
     "5% DP / 5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 5, "default_monthly": 1.0},
+    "0% DP / 0% Disc / 1% Monthly": {"dp_pct": 0, "disc": 0, "default_monthly": 1.0},
+    "0% DP / 5% Disc / 1% Monthly": {"dp_pct": 0, "disc": 5, "default_monthly": 1.0},
     "5% DP / 0% Disc / 1% Monthly": {"dp_pct": 5, "disc": 0, "default_monthly": 1.0},
     "5% DP / 2.5% Disc / 1% Monthly": {"dp_pct": 5, "disc": 2.5, "default_monthly": 1.0},
     "10% DP / 5% Disc / 1% Monthly": {"dp_pct": 10, "disc": 5, "default_monthly": 1.0},
