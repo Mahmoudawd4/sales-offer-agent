@@ -429,22 +429,22 @@ ALL_PLANS = {
         "ho_pct": 10,           # دفعة الاستلام
         "installments_count": 100, 
         "default_monthly": 0.75 # (100% - 15% DP - 10% HO) / 100
-    }
-    ,
-    "Horya-15% DP / 7.5% Disc / 10% HO / 100 Months": {
-        "dp_pct": 15, 
-        "disc": 7.5, 
-        "ho_pct": 10,           # دفعة الاستلام
-        "installments_count": 100, 
-        "default_monthly": 0.75 # (100% - 15% DP - 10% HO) / 100
     },
-    "Horya-10% DP / 5% Disc / 10% HO / 100 Months": {
-        "dp_pct": 10, 
-        "disc": 5, 
-        "ho_pct": 10,           # دفعة الاستلام
-        "installments_count": 100, 
-        "default_monthly": 0.8  # (100% - 10% DP - 10% HO) / 100
-    }
+   "Horya-15% DP / 7.5% Disc / 10% HO / 80 Months": {
+    "dp_pct": 15,
+    "disc": 7.5,
+    "ho_pct": 10,           # دفعة الاستلام
+    "installments_count": 80,
+    "default_monthly": 0.9375
+},
+
+"Horya-10% DP / 5% Disc / 10% HO / 80 Months": {
+    "dp_pct": 10,
+    "disc": 5,
+    "ho_pct": 10,           # دفعة الاستلام
+    "installments_count": 80,
+    "default_monthly": 1.0
+}
 
 }
 
