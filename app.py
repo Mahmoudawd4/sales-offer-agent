@@ -726,7 +726,7 @@ def create_sales_offer_pdf(unit_data, financials, schedule, layout_url, plan_nam
 
 
 
-    pdf.cell(100, 6, "Selling Price:", 0); pdf.cell(90, 6, f"{financials['selling_price']:,.2f} AED", 0, 1, 'R')
+    pdf.cell(100, 6, "Selling Price with parking:", 0); pdf.cell(90, 6, f"{financials['selling_price']:,.2f} AED", 0, 1, 'R')
 
 
 
