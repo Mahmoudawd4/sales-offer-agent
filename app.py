@@ -154,6 +154,28 @@ PROJECTS_DATABASE = {
 
     }
     ,
+ "Reportage Oceana": {
+
+
+
+        "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1449190315&single=true&output=csv",
+
+
+
+        "gov_pct": 2.5,
+
+
+
+        "admin_fees": 5350,
+
+
+
+        "res_fee": 20000 
+
+
+
+    }
+    ,
 
 
 
