@@ -353,7 +353,7 @@ PROJECTS_DATABASE = {
      "MANAGEMENT UNITS AUH (ADM)": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1704395837&single=true&output=csv",
         "gov_pct": 2.0,
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
         "res_fee": 20000 
     },
      "MANAGEMENT UNITS AUH (ADGM)": {
