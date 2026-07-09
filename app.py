@@ -45,7 +45,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
 
 
 
@@ -69,7 +69,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
 
 
 
@@ -93,7 +93,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
 
 
 
@@ -189,7 +189,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
 
 
 
@@ -239,7 +239,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
 
 
 
@@ -261,7 +261,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2,375,
+        "admin_fees": 2.375,
 
 
 
