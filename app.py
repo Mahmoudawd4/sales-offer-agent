@@ -45,7 +45,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
 
 
 
@@ -69,7 +69,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
 
 
 
@@ -93,7 +93,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
 
 
 
@@ -189,7 +189,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
 
 
 
@@ -239,7 +239,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
 
 
 
@@ -252,7 +252,7 @@ PROJECTS_DATABASE = {
     "Brabus Tower E": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1323446190&single=true&output=csv",
         "gov_pct": 2.0,
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
         "res_fee": 50000 
 
     }
@@ -260,7 +260,7 @@ PROJECTS_DATABASE = {
     "BRABUSTH": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=56857260&single=true&output=csv",
         "gov_pct": 2.0,
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
         "res_fee": 100000 
     }
     ,
@@ -360,7 +360,7 @@ PROJECTS_DATABASE = {
      "MANAGEMENT UNITS AUH (ADM)": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1704395837&single=true&output=csv",
         "gov_pct": 2.0,
-        "admin_fees": 2.375,
+        "admin_fees": 2375,
         "res_fee": 20000 
     },
      "MANAGEMENT UNITS AUH (ADGM)": {
