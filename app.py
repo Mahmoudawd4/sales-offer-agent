@@ -117,7 +117,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 1194,
+        "admin_fees": 2194,
 
 
 
@@ -214,7 +214,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 1194,
+        "admin_fees": 2194,
 
 
 
@@ -279,7 +279,7 @@ PROJECTS_DATABASE = {
 
 
 
-        "admin_fees": 1194,
+        "admin_fees": 2194,
 
 
 
@@ -292,69 +292,69 @@ PROJECTS_DATABASE = {
     "VERDANA N TH": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1654006326&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
     ,
     "VERDANA 26 (4Z) TOWNHOUSE": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=322802294&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
     ,
     "VERDANA 26-RES (4Z).": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1623834494&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
     ,
     "VERDANA N R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1593282205&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
         ,
     "VERDANA 10 R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=833822872&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
     ,
     "VERDANA 9 R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1641737645&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
     ,
     "VERDANA 8 R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=2138617608&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
     ,
     "VERDANA 7 R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1423929833&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     }
 ,
     "VERDANA 6 R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=290574832&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     },
     "VERDANA 5 R": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1269333085&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     },
      "MANAGEMENT UNITS AUH (ADM)": {
@@ -372,7 +372,7 @@ PROJECTS_DATABASE = {
      "MANAGEMENT UNITS DUBAI (DLD)": {
         "url":"https://docs.google.com/spreadsheets/d/e/2PACX-1vSLDSBkzA1ZpD1qCRFjl4TiNWldYobalUdgwADyljTFkWMJrvVXajgFxegKWDr2SA-UcuAc8mGonW36/pub?gid=1581638955&single=true&output=csv",
         "gov_pct": 4.0,
-        "admin_fees": 1194,
+        "admin_fees": 2194,
         "res_fee": 20000 
     },
      "HoryaTH": {
