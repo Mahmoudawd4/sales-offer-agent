@@ -436,6 +436,7 @@ ALL_PLANS = {
     "20% DP / 20% Disc / 1% Monthly": {"dp_pct": 20, "disc": 20, "default_monthly": 1.0},
     "20% DP / 80% Handover (No Disc)": {"dp_pct": 20, "disc": 0, "default_monthly": 0.0},
     "20% DP / 2% Disc / 10%@12m / 70% HO": {"dp_pct": 20, "disc": 2, "default_monthly": 0.0, "is_special": True},
+    "20% DP / 0% Disc / 10%@12m / 70% HO": {"dp_pct": 20, "disc": 0, "default_monthly": 0.0, "is_special": True},
     "20% Discount Cash": {"dp_pct": 100, "disc": 20, "default_monthly": 0.0},
     "25% Discount Cash": {"dp_pct": 100, "disc": 25, "default_monthly": 0.0},
     "30% Discount Cash": {"dp_pct": 100, "disc": 30, "default_monthly": 0.0},
