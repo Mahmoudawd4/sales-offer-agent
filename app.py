@@ -480,6 +480,13 @@ ALL_PLANS = {
     "ho_pct": 10,           # دفعة الاستلام
     "installments_count": 100,
     "default_monthly": 0.60  # (100 - 30 - 10) / 100
+},
+ "Horya-10% DP / 0% Disc / No HO / 144 Months": {
+    "dp_pct": 10,
+    "disc": 0,
+    "ho_pct": 0,              # No Handover Payment
+    "installments_count": 144,
+    "default_monthly": 0.625  # (100 - 10 - 0) / 144 = 90 / 144
 }
 
 }
