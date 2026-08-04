@@ -487,6 +487,13 @@ ALL_PLANS = {
     "ho_pct": 0,              # No Handover Payment
     "installments_count": 144,
     "default_monthly": 0.625  # 90% / 144 = 0.625% per month
+},
+"Horya-10% DP / 0% Disc / No HO / 144 Months 2": {
+    "dp_pct": 10,
+    "disc": 0,
+    "ho_pct": 0.625,
+    "installments_count": 144,
+    "default_monthly": 0.625
 }
 
 }
